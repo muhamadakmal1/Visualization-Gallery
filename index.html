@@ -1,0 +1,2532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Science Visualization Gallery</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.14.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --accent: #10b981;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f1f5f9;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .visualization-section {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 3rem;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .visualization-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-header {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1.3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 1.5rem;
+        }
+        
+        .graph-container {
+            flex: 1;
+            min-width: 400px;
+            padding: 1rem;
+            border-right: 1px solid #e2e8f0;
+        }
+        
+        .code-container {
+            flex: 1;
+            min-width: 400px;
+            padding: 1rem;
+            background-color: #f8fafc;
+            overflow-x: auto;
+        }
+        
+        pre {
+            background-color: #1e293b;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Consolas', monospace;
+            overflow-x: auto;
+            line-height: 1.5;
+            tab-size: 4;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        button:hover {
+            background-color: #4f46e5;
+        }
+        
+        select {
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background-color: white;
+        }
+        
+        .tooltip {
+            position: absolute;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            pointer-events: none;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 900px) {
+            .section-content {
+                flex-direction: column;
+            }
+            
+            .graph-container {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Data Science Visualization Gallery</h1>
+            <p class="subtitle">Interactive visualizations with corresponding Python code</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Scatter Plot Section -->
+        <section class="visualization-section">
+            <div class="section-header">
+                <h2>Scatter Plot</h2>
+                <div class="controls">
+                    <button id="scatter-randomize">Randomize Data</button>
+                    <select id="scatter-color">
+                        <option value="species">By Species</option>
+                        <option value="sepal_length">By Sepal Length</option>
+                        <option value="petal_length">By Petal Length</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="graph-container" id="scatter-plot"></div>
+                <div class="code-container">
+                    <pre><code class="python"># Python code to create a similar scatter plot
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+from sklearn.datasets import load_iris
+
+# Load sample data
+iris = load_iris()
+df = pd.DataFrame(iris.data, columns=iris.feature_names)
+df['species'] = iris.target
+df['species'] = df['species'].map({0: 'setosa', 1: 'versicolor', 2: 'virginica'})
+
+# Create scatter plot
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=df, x='sepal length (cm)', y='petal length (cm)', 
+                hue='species', palette='viridis', s=100)
+
+# Customize plot
+plt.title('Iris Dataset: Sepal vs Petal Length', fontsize=14)
+plt.xlabel('Sepal Length (cm)')
+plt.ylabel('Petal Length (cm)')
+plt.legend(title='Species')
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Line Chart Section -->
+        <section class="visualization-section">
+            <div class="section-header">
+                <h2>Line Chart</h2>
+                <div class="controls">
+                    <button id="line-randomize">Randomize Data</button>
+                    <select id="line-metric">
+                        <option value="temperature">Temperature</option>
+                        <option value="humidity">Humidity</option>
+                        <option value="pressure">Pressure</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="graph-container" id="line-chart"></div>
+                <div class="code-container">
+                    <pre><code class="python"># Python code to create a similar line chart
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+# Generate sample time series data
+dates = pd.date_range('2023-01-01', periods=30, freq='D')
+temperature = np.random.normal(loc=20, scale=5, size=30).cumsum()
+humidity = np.random.normal(loc=50, scale=10, size=30).cumsum()
+pressure = np.random.normal(loc=1010, scale=5, size=30).cumsum()
+
+# Create DataFrame
+df = pd.DataFrame({
+    'date': dates,
+    'temperature': temperature,
+    'humidity': humidity,
+    'pressure': pressure
+})
+
+# Create line plot
+plt.figure(figsize=(12, 6))
+plt.plot(df['date'], df['temperature'], marker='o', 
+         label='Temperature (°C)', color='#4C78A8')
+
+# Customize plot
+plt.title('Daily Weather Metrics', fontsize=14)
+plt.xlabel('Date')
+plt.ylabel('Value')
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.xticks(rotation=45)
+plt.tight_layout()
+
+plt.show()</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Bar Chart Section -->
+        <section class="visualization-section">
+            <div class="section-header">
+                <h2>Bar Chart</h2>
+                <div class="controls">
+                    <button id="bar-randomize">Randomize Data</button>
+                    <select id="bar-sort">
+                        <option value="asc">Sort Ascending</option>
+                        <option value="desc">Sort Descending</option>
+                        <option value="original">Original Order</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="graph-container" id="bar-chart"></div>
+                <div class="code-container">
+                    <pre><code class="python"># Python code to create a similar bar chart
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+# Sample data
+categories = ['Electronics', 'Clothing', 'Groceries', 'Furniture', 'Books']
+sales = np.random.randint(50, 200, size=len(categories))
+profit = sales * np.random.uniform(0.1, 0.3, size=len(categories))
+
+# Create DataFrame
+df = pd.DataFrame({
+    'Category': categories,
+    'Sales': sales,
+    'Profit': profit
+})
+
+# Create bar plot
+plt.figure(figsize=(10, 6))
+bars = plt.bar(df['Category'], df['Sales'], color='#E45756')
+
+# Add profit line
+ax2 = plt.gca().twinx()
+ax2.plot(df['Category'], df['Profit'], color='#54A24B', 
+         marker='o', label='Profit')
+
+# Customize plot
+plt.title('Sales by Category with Profit', fontsize=14)
+plt.xlabel('Category')
+plt.ylabel('Sales ($)')
+ax2.set_ylabel('Profit ($)')
+plt.xticks(rotation=45)
+plt.grid(axis='y', alpha=0.3)
+
+# Add value labels
+for bar in bars:
+    height = bar.get_height()
+    plt.gca().text(bar.get_x() + bar.get_width()/2., height,
+                   f'{height:.0f}', ha='center', va='bottom')
+
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Histogram Section -->
+        <section class="visualization-section">
+            <div class="section-header">
+                <h2>Histogram</h2>
+                <div class="controls">
+                    <button id="hist-randomize">Randomize Data</button>
+                    <select id="hist-bins">
+                        <option value="5">5 Bins</option>
+                        <option value="10" selected>10 Bins</option>
+                        <option value="20">20 Bins</option>
+                        <option value="30">30 Bins</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="graph-container" id="histogram"></div>
+                <div class="code-container">
+                    <pre><code class="python"># Python code to create a similar histogram
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+
+# Generate sample data
+np.random.seed(42)
+data1 = np.random.normal(loc=50, scale=10, size=1000)
+data2 = np.random.normal(loc=70, scale=15, size=800)
+
+# Create histogram
+plt.figure(figsize=(10, 6))
+sns.histplot(data1, bins=20, color='#4C78A8', 
+             label='Group A', alpha=0.7, kde=True)
+sns.histplot(data2, bins=20, color='#E45756', 
+             label='Group B', alpha=0.7, kde=True)
+
+# Customize plot
+plt.title('Distribution Comparison', fontsize=14)
+plt.xlabel('Value')
+plt.ylabel('Frequency')
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Box Plot Section -->
+        <section class="visualization-section">
+            <div class="section-header">
+                <h2>Box Plot</h2>
+                <div class="controls">
+                    <button id="box-randomize">Randomize Data</button>
+                    <select id="box-group">
+                        <option value="all">All Groups</option>
+                        <option value="group1">Group 1 Only</option>
+                        <option value="group2">Group 2 Only</option>
+                        <option value="group3">Group 3 Only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="graph-container" id="box-plot"></div>
+                <div class="code-container">
+                    <pre><code class="python"># Python code to create a similar box plot
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+# Generate sample data
+np.random.seed(42)
+group1 = np.random.normal(loc=50, scale=10, size=100)
+group2 = np.random.normal(loc=60, scale=8, size=100)
+group3 = np.random.normal(loc=70, scale=12, size=100)
+
+# Create DataFrame
+df = pd.DataFrame({
+    'Group': ['Group 1'] * 100 + ['Group 2'] * 100 + ['Group 3'] * 100,
+    'Value': np.concatenate([group1, group2, group3])
+})
+
+# Create box plot
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=df, x='Group', y='Value', palette='Set2')
+
+# Add swarm plot for individual points
+sns.swarmplot(data=df, x='Group', y='Value', color='.25', size=3)
+
+# Customize plot
+plt.title('Distribution Across Groups', fontsize=14)
+plt.xlabel('Group')
+plt.ylabel('Value')
+plt.grid(True, axis='y', alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Heatmap Section -->
+        <section class="visualization-section">
+            <div class="section-header">
+                <h2>Correlation Heatmap</h2>
+                <div class="controls">
+                    <button id="heatmap-randomize">Randomize Data</button>
+                    <select id="heatmap-cmap">
+                        <option value="viridis">Viridis</option>
+                        <option value="plasma">Plasma</option>
+                        <option value="coolwarm">Coolwarm</option>
+                        <option value="RdYlBu">Red-Yellow-Blue</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="graph-container" id="heatmap"></div>
+                <div class="code-container">
+                    <pre><code class="python"># Python code to create a similar heatmap
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+# Generate sample correlation data
+np.random.seed(42)
+data = np.random.randn(100, 6)
+df = pd.DataFrame(data, columns=[
+    'Age', 'Income', 'Spending', 'Savings', 'Debt', 'Credit Score'
+])
+
+# Compute correlation matrix
+corr = df.corr()
+
+# Create heatmap
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr, annot=True, cmap='coolwarm', 
+            vmin=-1, vmax=1, center=0,
+            square=True, linewidths=.5, 
+            cbar_kws={"shrink": .8})
+
+# Customize plot
+plt.title('Feature Correlation Matrix', fontsize=14)
+plt.xticks(rotation=45)
+plt.yticks(rotation=0)
+
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Pie Chart Section -->
+        <section class="visualization-section">
+            <div class="section-header">
+                <h2>Pie Chart</h2>
+                <div class="controls">
+                    <button id="pie-randomize">Randomize Data</button>
+                    <select id="pie-explode">
+                        <option value="none">No Explode</option>
+                        <option value="some">Explode Some</option>
+                        <option value="all">Explode All</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="graph-container" id="pie-chart"></div>
+                <div class="code-container">
+                    <pre><code class="python"># Python code to create a similar pie chart
+import matplotlib.pyplot as plt
+
+# Sample data
+labels = ['Electronics', 'Clothing', 'Home', 'Books', 'Other']
+sizes = [35, 25, 20, 15, 5]
+colors = ['#4C78A8', '#E45756', '#54A24B', '#EECA3B', '#B279A2']
+explode = (0.1, 0, 0, 0, 0)  # Explode 1st slice
+
+# Create pie chart
+plt.figure(figsize=(8, 8))
+patches, texts, autotexts = plt.pie(
+    sizes, explode=explode, labels=labels, colors=colors,
+    autopct='%1.1f%%', shadow=True, startangle=140,
+    textprops={'color': 'white', 'fontsize': 12}
+)
+
+# Customize plot
+plt.title('Sales Distribution by Category', fontsize=14)
+plt.setp(autotexts, size=12, weight='bold')
+plt.axis('equal')  # Equal aspect ratio ensures pie is drawn as circle
+
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Scatter Plot Matrix Section -->
+        <section class="visualization-section">
+            <div class="section-header">
+                <h2>Scatter Plot Matrix</h2>
+                <div class="controls">
+                    <button id="splom-randomize">Randomize Data</button>
+                    <select id="splom-variables">
+                        <option value="4">4 Variables</option>
+                        <option value="5">5 Variables</option>
+                        <option value="6">6 Variables</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="graph-container" id="scatter-matrix"></div>
+                <div class="code-container">
+                    <pre><code class="python"># Python code to create a similar scatter plot matrix
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from sklearn.datasets import load_iris
+
+# Load sample data
+iris = load_iris()
+df = pd.DataFrame(iris.data, columns=iris.feature_names)
+df['species'] = iris.target
+df['species'] = df['species'].map({0: 'setosa', 1: 'versicolor', 2: 'virginica'})
+
+# Create scatter plot matrix
+plt.figure(figsize=(12, 12))
+sns.pairplot(df, hue='species', palette='viridis',
+             diag_kind='kde', markers=['o', 's', 'D'])
+
+plt.suptitle('Iris Dataset Scatter Plot Matrix', y=1.02)
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Radar Chart Section -->
+        <section class="visualization-section">
+            <div class="section-header">
+                <h2>Radar Chart</h2>
+                <div class="controls">
+                    <button id="radar-randomize">Randomize Data</button>
+                    <select id="radar-metric">
+                        <option value="player1">Player 1</option>
+                        <option value="player2">Player 2</option>
+                        <option value="player3">Player 3</option>
+                    </select>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="graph-container" id="radar-chart"></div>
+                <div class="code-container">
+                    <pre><code class="python"># Python code to create a similar radar chart
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Sample data
+categories = ['Speed', 'Shooting', 'Passing', 'Dribbling', 'Defense', 'Physical']
+player1 = [85, 78, 92, 76, 80, 88]
+player2 = [72, 85, 80, 90, 65, 70]
+
+# Number of variables we're plotting
+num_vars = len(categories)
+
+# Compute angle for each axis
+angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+
+# Complete the loop
+player1 += player1[:1]
+player2 += player2[:1]
+angles += angles[:1]
+
+# Create radar chart
+fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+ax.plot(angles, player1, color='#4C78A8', linewidth=2, label='Player 1')
+ax.fill(angles, player1, color='#4C78A8', alpha=0.25)
+ax.plot(angles, player2, color='#E45756', linewidth=2, label='Player 2')
+ax.fill(angles, player2, color='#E45756', alpha=0.25)
+
+# Customize plot
+ax.set_theta_offset(np.pi / 2)
+ax.set_theta_direction(-1)
+ax.set_thetagrids(np.degrees(angles[:-1]), categories)
+ax.set_rlabel_position(0)
+plt.yticks([20, 40, 60, 80, 100], ["20", "40", "60", "80", "100"], color="grey", size=7)
+plt.ylim(0, 100)
+plt.title('Player Comparison Radar Chart', fontsize=14, pad=20)
+plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+
+plt.tight_layout()
+plt.show()</code></pre>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>Interactive Data Science Visualization Gallery | Compare with Python implementations</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Tooltip for all visualizations
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+        
+        // Sample data generators
+        function generateScatterData() {
+            const species = ['setosa', 'versicolor', 'virginica'];
+            const data = [];
+            
+            for (let i = 0; i < 100; i++) {
+                const s = species[Math.floor(Math.random() * species.length)];
+                let sepalLength, petalLength;
+                
+                if (s === 'setosa') {
+                    sepalLength = 4.5 + Math.random() * 2;
+                    petalLength = 1 + Math.random() * 1.5;
+                } else if (s === 'versicolor') {
+                    sepalLength = 5.5 + Math.random() * 2;
+                    petalLength = 3 + Math.random() * 2;
+                } else {
+                    sepalLength = 6 + Math.random() * 2;
+                    petalLength = 4.5 + Math.random() * 2;
+                }
+                
+                data.push({
+                    sepal_length: sepalLength,
+                    petal_length: petalLength,
+                    species: s
+                });
+            }
+            
+            return data;
+        }
+        
+        function generateLineData() {
+            const dates = [];
+            const now = new Date();
+            for (let i = 0; i < 30; i++) {
+                const date = new Date(now);
+                date.setDate(now.getDate() - 29 + i);
+                dates.push(date);
+            }
+            
+            let temp = 20, humidity = 50, pressure = 1010;
+            const tempData = [], humidityData = [], pressureData = [];
+            
+            for (let i = 0; i < 30; i++) {
+                temp += (Math.random() - 0.5) * 5;
+                humidity += (Math.random() - 0.5) * 10;
+                pressure += (Math.random() - 0.5) * 5;
+                
+                tempData.push(temp);
+                humidityData.push(humidity);
+                pressureData.push(pressure);
+            }
+            
+            return {
+                dates: dates,
+                temperature: tempData,
+                humidity: humidityData,
+                pressure: pressureData
+            };
+        }
+        
+        function generateBarData() {
+            const categories = ['Electronics', 'Clothing', 'Groceries', 'Furniture', 'Books', 'Toys', 'Sports'];
+            const sales = categories.map(() => 50 + Math.random() * 150);
+            const profit = sales.map(s => s * (0.1 + Math.random() * 0.2));
+            
+            return {
+                categories: categories,
+                sales: sales,
+                profit: profit
+            };
+        }
+        
+        function generateHistogramData() {
+            const group1 = Array.from({length: 1000}, () => 50 + (Math.random() - 0.5) * 20);
+            const group2 = Array.from({length: 800}, () => 70 + (Math.random() - 0.5) * 30);
+            
+            return {
+                group1: group1,
+                group2: group2
+            };
+        }
+        
+        function generateBoxPlotData() {
+            const group1 = Array.from({length: 100}, () => 50 + (Math.random() - 0.5) * 20);
+            const group2 = Array.from({length: 100}, () => 60 + (Math.random() - 0.5) * 16);
+            const group3 = Array.from({length: 100}, () => 70 + (Math.random() - 0.5) * 24);
+            
+            return {
+                group1: group1,
+                group2: group2,
+                group3: group3
+            };
+        }
+        
+        function generateHeatmapData() {
+            const features = ['Age', 'Income', 'Spending', 'Savings', 'Debt', 'Credit Score'];
+            const data = [];
+            
+            for (let i = 0; i < 100; i++) {
+                const row = {};
+                features.forEach(f => {
+                    row[f] = Math.random() * 100;
+                });
+                data.push(row);
+            }
+            
+            // Compute correlations
+            const corr = {};
+            features.forEach(f1 => {
+                corr[f1] = {};
+                features.forEach(f2 => {
+                    if (f1 === f2) {
+                        corr[f1][f2] = 1;
+                    } else {
+                        corr[f1][f2] = Math.random() * 2 - 1;
+                    }
+                });
+            });
+            
+            return {
+                features: features,
+                correlation: corr
+            };
+        }
+        
+        function generatePieData() {
+            const categories = ['Electronics', 'Clothing', 'Home', 'Books', 'Other'];
+            const values = categories.map(() => 5 + Math.random() * 30);
+            const total = values.reduce((a, b) => a + b, 0);
+            const percentages = values.map(v => (v / total * 100).toFixed(1));
+            
+            return {
+                categories: categories,
+                values: values,
+                percentages: percentages
+            };
+        }
+        
+        function generateScatterMatrixData() {
+            const species = ['setosa', 'versicolor', 'virginica'];
+            const data = [];
+            
+            for (let i = 0; i < 150; i++) {
+                const s = species[Math.floor(i / 50)];
+                let sepalLength, sepalWidth, petalLength, petalWidth;
+                
+                if (s === 'setosa') {
+                    sepalLength = 4.5 + Math.random() * 2;
+                    sepalWidth = 2.5 + Math.random() * 1.5;
+                    petalLength = 1 + Math.random() * 1.5;
+                    petalWidth = 0.1 + Math.random() * 0.4;
+                } else if (s === 'versicolor') {
+                    sepalLength = 5.5 + Math.random() * 2;
+                    sepalWidth = 2 + Math.random() * 1;
+                    petalLength = 3 + Math.random() * 2;
+                    petalWidth = 1 + Math.random() * 0.5;
+                } else {
+                    sepalLength = 6 + Math.random() * 2;
+                    sepalWidth = 2.5 + Math.random() * 1;
+                    petalLength = 4.5 + Math.random() * 2;
+                    petalWidth = 1.5 + Math.random() * 0.5;
+                }
+                
+                data.push({
+                    sepal_length: sepalLength,
+                    sepal_width: sepalWidth,
+                    petal_length: petalLength,
+                    petal_width: petalWidth,
+                    species: s
+                });
+            }
+            
+            return data;
+        }
+        
+        function generateRadarData() {
+            const categories = ['Speed', 'Shooting', 'Passing', 'Dribbling', 'Defense', 'Physical'];
+            
+            const player1 = categories.map(() => 60 + Math.random() * 40);
+            const player2 = categories.map(() => 60 + Math.random() * 40);
+            const player3 = categories.map(() => 60 + Math.random() * 40);
+            
+            return {
+                categories: categories,
+                player1: player1,
+                player2: player2,
+                player3: player3
+            };
+        }
+        
+        // Initialize all visualizations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Scatter Plot
+            let scatterData = generateScatterData();
+            renderScatterPlot(scatterData);
+            
+            document.getElementById('scatter-randomize').addEventListener('click', function() {
+                scatterData = generateScatterData();
+                renderScatterPlot(scatterData);
+            });
+            
+            document.getElementById('scatter-color').addEventListener('change', function() {
+                renderScatterPlot(scatterData);
+            });
+            
+            // Line Chart
+            let lineData = generateLineData();
+            renderLineChart(lineData);
+            
+            document.getElementById('line-randomize').addEventListener('click', function() {
+                lineData = generateLineData();
+                renderLineChart(lineData);
+            });
+            
+            document.getElementById('line-metric').addEventListener('change', function() {
+                renderLineChart(lineData);
+            });
+            
+            // Bar Chart
+            let barData = generateBarData();
+            renderBarChart(barData);
+            
+            document.getElementById('bar-randomize').addEventListener('click', function() {
+                barData = generateBarData();
+                renderBarChart(barData);
+            });
+            
+            document.getElementById('bar-sort').addEventListener('change', function() {
+                renderBarChart(barData);
+            });
+            
+            // Histogram
+            let histData = generateHistogramData();
+            renderHistogram(histData);
+            
+            document.getElementById('hist-randomize').addEventListener('click', function() {
+                histData = generateHistogramData();
+                renderHistogram(histData);
+            });
+            
+            document.getElementById('hist-bins').addEventListener('change', function() {
+                renderHistogram(histData);
+            });
+            
+            // Box Plot
+            let boxData = generateBoxPlotData();
+            renderBoxPlot(boxData);
+            
+            document.getElementById('box-randomize').addEventListener('click', function() {
+                boxData = generateBoxPlotData();
+                renderBoxPlot(boxData);
+            });
+            
+            document.getElementById('box-group').addEventListener('change', function() {
+                renderBoxPlot(boxData);
+            });
+            
+            // Heatmap
+            let heatmapData = generateHeatmapData();
+            renderHeatmap(heatmapData);
+            
+            document.getElementById('heatmap-randomize').addEventListener('click', function() {
+                heatmapData = generateHeatmapData();
+                renderHeatmap(heatmapData);
+            });
+            
+            document.getElementById('heatmap-cmap').addEventListener('change', function() {
+                renderHeatmap(heatmapData);
+            });
+            
+            // Pie Chart
+            let pieData = generatePieData();
+            renderPieChart(pieData);
+            
+            document.getElementById('pie-randomize').addEventListener('click', function() {
+                pieData = generatePieData();
+                renderPieChart(pieData);
+            });
+            
+            document.getElementById('pie-explode').addEventListener('change', function() {
+                renderPieChart(pieData);
+            });
+            
+            // Scatter Plot Matrix
+            let splomData = generateScatterMatrixData();
+            renderScatterMatrix(splomData);
+            
+            document.getElementById('splom-randomize').addEventListener('click', function() {
+                splomData = generateScatterMatrixData();
+                renderScatterMatrix(splomData);
+            });
+            
+            document.getElementById('splom-variables').addEventListener('change', function() {
+                renderScatterMatrix(splomData);
+            });
+            
+            // Radar Chart
+            let radarData = generateRadarData();
+            renderRadarChart(radarData);
+            
+            document.getElementById('radar-randomize').addEventListener('click', function() {
+                radarData = generateRadarData();
+                renderRadarChart(radarData);
+            });
+            
+            document.getElementById('radar-metric').addEventListener('change', function() {
+                renderRadarChart(radarData);
+            });
+        });
+        
+        // Visualization rendering functions
+        function renderScatterPlot(data) {
+            const colorBy = document.getElementById('scatter-color').value;
+            const colorScale = d3.scaleOrdinal()
+                .domain(['setosa', 'versicolor', 'virginica'])
+                .range(['#4C78A8', '#E45756', '#54A24B']);
+            
+            const sizeScale = d3.scaleLinear()
+                .domain(d3.extent(data, d => d[colorBy]))
+                .range([5, 15]);
+            
+            const margin = {top: 20, right: 20, bottom: 50, left: 60};
+            const width = document.getElementById('scatter-plot').clientWidth - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+            
+            d3.select('#scatter-plot').selectAll('*').remove();
+            
+            const svg = d3.select('#scatter-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Scales
+            const x = d3.scaleLinear()
+                .domain([d3.min(data, d => d.sepal_length) - 0.5, d3.max(data, d => d.sepal_length) + 0.5])
+                .range([0, width]);
+            
+            const y = d3.scaleLinear()
+                .domain([d3.min(data, d => d.petal_length) - 0.5, d3.max(data, d => d.petal_length) + 0.5])
+                .range([height, 0]);
+            
+            // Axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+            
+            svg.append('g')
+                .call(d3.axisLeft(y));
+            
+            // Labels
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + margin.bottom - 10)
+                .style('text-anchor', 'middle')
+                .text('Sepal Length');
+            
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -margin.left + 15)
+                .attr('x', -height / 2)
+                .style('text-anchor', 'middle')
+                .text('Petal Length');
+            
+            // Title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -5)
+                .style('text-anchor', 'middle')
+                .style('font-size', '14px')
+                .text('Iris Dataset: Sepal vs Petal Length');
+            
+            // Grid lines
+            svg.append('g')
+                .attr('class', 'grid')
+                .call(d3.axisLeft(y)
+                    .tickSize(-width)
+                    .tickFormat(''))
+                .selectAll('.tick line')
+                .style('stroke', '#e2e8f0')
+                .style('stroke-width', 1);
+            
+            svg.append('g')
+                .attr('class', 'grid')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x)
+                    .tickSize(-height)
+                    .tickFormat(''))
+                .selectAll('.tick line')
+                .style('stroke', '#e2e8f0')
+                .style('stroke-width', 1);
+            
+            // Points
+            svg.selectAll('.dot')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('class', 'dot')
+                .attr('cx', d => x(d.sepal_length))
+                .attr('cy', d => y(d.petal_length))
+                .attr('r', d => colorBy === 'species' ? 8 : sizeScale(d[colorBy]))
+                .style('fill', d => colorScale(d.species))
+                .style('opacity', 0.8)
+                .on('mouseover', function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+                    tooltip.html(`Species: ${d.species}<br/>
+                                  Sepal Length: ${d.sepal_length.toFixed(1)}<br/>
+                                  Petal Length: ${d.petal_length.toFixed(1)}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function() {
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                });
+            
+            // Legend
+            const legend = svg.append('g')
+                .attr('transform', `translate(${width - 100}, 20)`);
+            
+            const legendData = ['setosa', 'versicolor', 'virginica'];
+            
+            legend.selectAll('.legend-item')
+                .data(legendData)
+                .enter()
+                .append('g')
+                .attr('class', 'legend-item')
+                .attr('transform', (d, i) => `translate(0, ${i * 20})`)
+                .each(function(d) {
+                    const g = d3.select(this);
+                    g.append('circle')
+                        .attr('r', 6)
+                        .attr('cx', 0)
+                        .attr('cy', 0)
+                        .style('fill', colorScale(d));
+                    
+                    g.append('text')
+                        .attr('x', 15)
+                        .attr('y', 5)
+                        .style('font-size', '12px')
+                        .text(d);
+                });
+            
+            // Color scale indicator if coloring by numeric value
+            if (colorBy !== 'species') {
+                const colorLegend = svg.append('g')
+                    .attr('transform', `translate(${width - 100}, ${height - 100})`);
+                
+                const sizeLegend = svg.append('g')
+                    .attr('transform', `translate(${width - 100}, ${height - 60})`);
+                
+                // Color legend
+                if (colorBy === 'sepal_length' || colorBy === 'petal_length') {
+                    const colorLegendScale = d3.scaleLinear()
+                        .domain(d3.extent(data, d => d[colorBy]))
+                        .range(['#f0f9e8', '#08589e']);
+                    
+                    const colorAxis = d3.axisBottom()
+                        .scale(colorLegendScale)
+                        .ticks(5);
+                    
+                    colorLegend.append('g')
+                        .call(colorAxis)
+                        .attr('transform', 'translate(0, 20)');
+                    
+                    const defs = svg.append('defs');
+                    const gradient = defs.append('linearGradient')
+                        .attr('id', 'color-gradient')
+                        .attr('x1', '0%')
+                        .attr('y1', '0%')
+                        .attr('x2', '100%')
+                        .attr('y2', '0%');
+                    
+                    gradient.append('stop')
+                        .attr('offset', '0%')
+                        .attr('stop-color', '#f0f9e8');
+                    
+                    gradient.append('stop')
+                        .attr('offset', '100%')
+                        .attr('stop-color', '#08589e');
+                    
+                    colorLegend.append('rect')
+                        .attr('width', 100)
+                        .attr('height', 10)
+                        .style('fill', 'url(#color-gradient)');
+                    
+                    colorLegend.append('text')
+                        .attr('x', 50)
+                        .attr('y', -5)
+                        .style('text-anchor', 'middle')
+                        .style('font-size', '10px')
+                        .text(colorBy.replace('_', ' '));
+                }
+                
+                // Size legend
+                const sizeAxis = d3.axisBottom()
+                    .scale(sizeScale)
+                    .ticks(3);
+                
+                sizeLegend.append('g')
+                    .call(sizeAxis)
+                    .attr('transform', 'translate(0, 20)');
+                
+                const sizeValues = sizeScale.ticks(3);
+                
+                sizeLegend.selectAll('.size-legend-circle')
+                    .data(sizeValues)
+                    .enter()
+                    .append('circle')
+                    .attr('cx', d => sizeScale(d) * 5)
+                    .attr('cy', 10)
+                    .attr('r', d => sizeScale(d))
+                    .style('fill', '#888')
+                    .style('opacity', 0.6);
+                
+                sizeLegend.append('text')
+                    .attr('x', 50)
+                    .attr('y', -5)
+                    .style('text-anchor', 'middle')
+                    .style('font-size', '10px')
+                    .text('Point size');
+            }
+        }
+        
+        function renderLineChart(data) {
+            const metric = document.getElementById('line-metric').value;
+            const margin = {top: 20, right: 60, bottom: 50, left: 60};
+            const width = document.getElementById('line-chart').clientWidth - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+            
+            d3.select('#line-chart').selectAll('*').remove();
+            
+            const svg = d3.select('#line-chart')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Parse dates
+            const parseTime = d3.timeParse('%Y-%m-%d');
+            
+            // Scales
+            const x = d3.scaleTime()
+                .domain(d3.extent(data.dates))
+                .range([0, width]);
+            
+            const y = d3.scaleLinear()
+                .domain([d3.min(data[metric]) * 0.95, d3.max(data[metric]) * 1.05])
+                .range([height, 0]);
+            
+            // Line generator
+            const line = d3.line()
+                .x(d => x(d.date))
+                .y(d => y(d.value))
+                .curve(d3.curveMonotoneX);
+            
+            // Format data for line
+            const lineData = data.dates.map((date, i) => ({
+                date: date,
+                value: data[metric][i]
+            }));
+            
+            // Axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x).ticks(5));
+            
+            svg.append('g')
+                .call(d3.axisLeft(y));
+            
+            // Grid lines
+            svg.append('g')
+                .attr('class', 'grid')
+                .call(d3.axisLeft(y)
+                    .tickSize(-width)
+                    .tickFormat(''))
+                .selectAll('.tick line')
+                .style('stroke', '#e2e8f0')
+                .style('stroke-width', 1);
+            
+            svg.append('g')
+                .attr('class', 'grid')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x)
+                    .tickSize(-height)
+                    .tickFormat(''))
+                .selectAll('.tick line')
+                .style('stroke', '#e2e8f0')
+                .style('stroke-width', 1);
+            
+            // Labels
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + margin.bottom - 10)
+                .style('text-anchor', 'middle')
+                .text('Date');
+            
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -margin.left + 15)
+                .attr('x', -height / 2)
+                .style('text-anchor', 'middle')
+                .text(metric === 'temperature' ? 'Temperature (°C)' : 
+                      metric === 'humidity' ? 'Humidity (%)' : 'Pressure (hPa)');
+            
+            // Title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -5)
+                .style('text-anchor', 'middle')
+                .style('font-size', '14px')
+                .text('Daily Weather Metrics');
+            
+            // Line path
+            svg.append('path')
+                .datum(lineData)
+                .attr('fill', 'none')
+                .attr('stroke', '#4C78A8')
+                .attr('stroke-width', 2)
+                .attr('d', line);
+            
+            // Add points
+            svg.selectAll('.dot')
+                .data(lineData)
+                .enter()
+                .append('circle')
+                .attr('class', 'dot')
+                .attr('cx', d => x(d.date))
+                .attr('cy', d => y(d.value))
+                .attr('r', 4)
+                .style('fill', '#4C78A8')
+                .on('mouseover', function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+                    tooltip.html(`${d.date.toDateString()}<br/>
+                                 ${metric}: ${d.value.toFixed(1)}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function() {
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                });
+        }
+        
+        function renderBarChart(data) {
+            const sortBy = document.getElementById('bar-sort').value;
+            const margin = {top: 20, right: 60, bottom: 50, left: 60};
+            const width = document.getElementById('bar-chart').clientWidth - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+            
+            d3.select('#bar-chart').selectAll('*').remove();
+            
+            const svg = d3.select('#bar-chart')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Prepare data
+            let barData = data.categories.map((category, i) => ({
+                category: category,
+                sales: data.sales[i],
+                profit: data.profit[i]
+            }));
+            
+            // Sort data if needed
+            if (sortBy === 'asc') {
+                barData.sort((a, b) => a.sales - b.sales);
+            } else if (sortBy === 'desc') {
+                barData.sort((a, b) => b.sales - a.sales);
+            }
+            
+            // Scales
+            const x = d3.scaleBand()
+                .domain(barData.map(d => d.category))
+                .range([0, width])
+                .padding(0.2);
+            
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(barData, d => d.sales) * 1.1])
+                .range([height, 0]);
+            
+            const y2 = d3.scaleLinear()
+                .domain([0, d3.max(barData, d => d.profit) * 1.1])
+                .range([height, 0]);
+            
+            // Axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end');
+            
+            svg.append('g')
+                .call(d3.axisLeft(y));
+            
+            // Secondary axis for profit
+            svg.append('g')
+                .attr('transform', `translate(${width}, 0)`)
+                .call(d3.axisRight(y2))
+                .style('color', '#54A24B');
+            
+            // Grid lines
+            svg.append('g')
+                .attr('class', 'grid')
+                .call(d3.axisLeft(y)
+                    .tickSize(-width)
+                    .tickFormat(''))
+                .selectAll('.tick line')
+                .style('stroke', '#e2e8f0')
+                .style('stroke-width', 1);
+            
+            // Labels
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + margin.bottom - 10)
+                .style('text-anchor', 'middle')
+                .text('Category');
+            
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -margin.left + 15)
+                .attr('x', -height / 2)
+                .style('text-anchor', 'middle')
+                .text('Sales ($)');
+            
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', width + margin.right - 15)
+                .attr('x', -height / 2)
+                .style('text-anchor', 'middle')
+                .style('fill', '#54A24B')
+                .text('Profit ($)');
+            
+            // Title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -5)
+                .style('text-anchor', 'middle')
+                .style('font-size', '14px')
+                .text('Sales by Category with Profit');
+            
+            // Bars
+            svg.selectAll('.bar')
+                .data(barData)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar')
+                .attr('x', d => x(d.category))
+                .attr('width', x.bandwidth())
+                .attr('y', d => y(d.sales))
+                .attr('height', d => height - y(d.sales))
+                .attr('fill', '#E45756')
+                .on('mouseover', function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+                    tooltip.html(`${d.category}<br/>
+                                 Sales: $${d.sales.toFixed(2)}<br/>
+                                 Profit: $${d.profit.toFixed(2)}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function() {
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                });
+            
+            // Add value labels on bars
+            svg.selectAll('.bar-label')
+                .data(barData)
+                .enter()
+                .append('text')
+                .attr('class', 'bar-label')
+                .attr('x', d => x(d.category) + x.bandwidth() / 2)
+                .attr('y', d => y(d.sales) - 5)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '10px')
+                .text(d => `$${d.sales.toFixed(0)}`);
+            
+            // Profit line
+            const line = d3.line()
+                .x(d => x(d.category) + x.bandwidth() / 2)
+                .y(d => y2(d.profit))
+                .curve(d3.curveMonotoneX);
+            
+            svg.append('path')
+                .datum(barData)
+                .attr('fill', 'none')
+                .attr('stroke', '#54A24B')
+                .attr('stroke-width', 2)
+                .attr('d', line);
+            
+            // Profit points
+            svg.selectAll('.profit-point')
+                .data(barData)
+                .enter()
+                .append('circle')
+                .attr('class', 'profit-point')
+                .attr('cx', d => x(d.category) + x.bandwidth() / 2)
+                .attr('cy', d => y2(d.profit))
+                .attr('r', 4)
+                .attr('fill', '#54A24B');
+        }
+        
+        function renderHistogram(data) {
+            const bins = parseInt(document.getElementById('hist-bins').value);
+            const margin = {top: 20, right: 20, bottom: 50, left: 60};
+            const width = document.getElementById('histogram').clientWidth - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+            
+            d3.select('#histogram').selectAll('*').remove();
+            
+            const svg = d3.select('#histogram')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Combine data for domain calculation
+            const combinedData = [...data.group1, ...data.group2];
+            
+            // Histogram generator
+            const histogram = d3.histogram()
+                .value(d => d)
+                .domain(d3.extent(combinedData))
+                .thresholds(bins);
+            
+            const bins1 = histogram(data.group1);
+            const bins2 = histogram(data.group2);
+            
+            // Scales
+            const x = d3.scaleLinear()
+                .domain(d3.extent(combinedData))
+                .range([0, width]);
+            
+            const y = d3.scaleLinear()
+                .domain([0, d3.max([...bins1, ...bins2], d => d.length)])
+                .range([height, 0]);
+            
+            // Axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+            
+            svg.append('g')
+                .call(d3.axisLeft(y));
+            
+            // Grid lines
+            svg.append('g')
+                .attr('class', 'grid')
+                .call(d3.axisLeft(y)
+                    .tickSize(-width)
+                    .tickFormat(''))
+                .selectAll('.tick line')
+                .style('stroke', '#e2e8f0')
+                .style('stroke-width', 1);
+            
+            svg.append('g')
+                .attr('class', 'grid')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x)
+                    .tickSize(-height)
+                    .tickFormat(''))
+                .selectAll('.tick line')
+                .style('stroke', '#e2e8f0')
+                .style('stroke-width', 1);
+            
+            // Labels
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + margin.bottom - 10)
+                .style('text-anchor', 'middle')
+                .text('Value');
+            
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -margin.left + 15)
+                .attr('x', -height / 2)
+                .style('text-anchor', 'middle')
+                .text('Frequency');
+            
+            // Title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -5)
+                .style('text-anchor', 'middle')
+                .style('font-size', '14px')
+                .text('Distribution Comparison');
+            
+            // Bars for group 1
+            svg.selectAll('.bar1')
+                .data(bins1)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar1')
+                .attr('x', d => x(d.x0) + 1)
+                .attr('y', d => y(d.length))
+                .attr('width', d => x(d.x1) - x(d.x0) - 2)
+                .attr('height', d => height - y(d.length))
+                .attr('fill', '#4C78A8')
+                .attr('opacity', 0.7)
+                .on('mouseover', function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+                    tooltip.html(`Group A<br/>
+                                 Range: ${d.x0.toFixed(1)} to ${d.x1.toFixed(1)}<br/>
+                                 Count: ${d.length}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function() {
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                });
+            
+            // Bars for group 2
+            svg.selectAll('.bar2')
+                .data(bins2)
+                .enter()
+                .append('rect')
+                .attr('class', 'bar2')
+                .attr('x', d => x(d.x0) + 1)
+                .attr('y', d => y(d.length))
+                .attr('width', d => x(d.x1) - x(d.x0) - 2)
+                .attr('height', d => height - y(d.length))
+                .attr('fill', '#E45756')
+                .attr('opacity', 0.7)
+                .on('mouseover', function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+                    tooltip.html(`Group B<br/>
+                                 Range: ${d.x0.toFixed(1)} to ${d.x1.toFixed(1)}<br/>
+                                 Count: ${d.length}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function() {
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                });
+            
+            // KDE for group 1
+            const kde1 = kernelDensityEstimator(kernelEpanechnikov(7), x.ticks(100));
+            const density1 = kde1(data.group1);
+            
+            svg.append('path')
+                .datum(density1)
+                .attr('fill', 'none')
+                .attr('stroke', '#4C78A8')
+                .attr('stroke-width', 2)
+                .attr('d', d3.line()
+                    .curve(d3.curveBasis)
+                    .x(d => x(d[0]))
+                    .y(d => y(d[1] * data.group1.length)));
+            
+            // KDE for group 2
+            const kde2 = kernelDensityEstimator(kernelEpanechnikov(7), x.ticks(100));
+            const density2 = kde2(data.group2);
+            
+            svg.append('path')
+                .datum(density2)
+                .attr('fill', 'none')
+                .attr('stroke', '#E45756')
+                .attr('stroke-width', 2)
+                .attr('d', d3.line()
+                    .curve(d3.curveBasis)
+                    .x(d => x(d[0]))
+                    .y(d => y(d[1] * data.group2.length)));
+            
+            // Legend
+            const legend = svg.append('g')
+                .attr('transform', `translate(${width - 100}, 20)`);
+            
+            legend.append('rect')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('width', 15)
+                .attr('height', 15)
+                .style('fill', '#4C78A8')
+                .style('opacity', 0.7);
+            
+            legend.append('text')
+                .attr('x', 20)
+                .attr('y', 12)
+                .text('Group A')
+                .style('font-size', '12px');
+            
+            legend.append('rect')
+                .attr('x', 0)
+                .attr('y', 20)
+                .attr('width', 15)
+                .attr('height', 15)
+                .style('fill', '#E45756')
+                .style('opacity', 0.7);
+            
+            legend.append('text')
+                .attr('x', 20)
+                .attr('y', 32)
+                .text('Group B')
+                .style('font-size', '12px');
+        }
+        
+        // Helper functions for KDE
+        function kernelDensityEstimator(kernel, X) {
+            return function(V) {
+                return X.map(function(x) {
+                    return [x, d3.mean(V, function(v) { return kernel(x - v); })];
+                });
+            };
+        }
+        
+        function kernelEpanechnikov(k) {
+            return function(v) {
+                return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+            };
+        }
+        
+        function renderBoxPlot(data) {
+            const group = document.getElementById('box-group').value;
+            const margin = {top: 20, right: 20, bottom: 50, left: 60};
+            const width = document.getElementById('box-plot').clientWidth - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+            
+            d3.select('#box-plot').selectAll('*').remove();
+            
+            const svg = d3.select('#box-plot')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Prepare data based on selected group
+            let plotData = [];
+            const groups = ['group1', 'group2', 'group3'];
+            
+            if (group === 'all') {
+                plotData = groups.map((g, i) => ({
+                    group: `Group ${i + 1}`,
+                    values: data[g]
+                }));
+            } else {
+                plotData = [{
+                    group: group.replace('group', 'Group '),
+                    values: data[group]
+                }];
+            }
+            
+            // Calculate summary statistics for each group
+            const boxplotData = plotData.map(d => {
+                const sorted = d.values.slice().sort(d3.ascending);
+                const q1 = d3.quantile(sorted, 0.25);
+                const median = d3.quantile(sorted, 0.5);
+                const q3 = d3.quantile(sorted, 0.75);
+                const iqr = q3 - q1;
+                const min = d3.min(sorted.filter(v => v >= q1 - 1.5 * iqr));
+                const max = d3.max(sorted.filter(v => v <= q3 + 1.5 * iqr));
+                
+                return {
+                    group: d.group,
+                    values: d.values,
+                    quartiles: [q1, median, q3],
+                    whiskers: [min, max],
+                    outliers: sorted.filter(v => v < min || v > max)
+                };
+            });
+            
+            // Scales
+            const x = d3.scaleBand()
+                .domain(boxplotData.map(d => d.group))
+                .range([0, width])
+                .padding(0.5);
+            
+            const y = d3.scaleLinear()
+                .domain([
+                    d3.min(boxplotData, d => d.whiskers[0]) * 0.95,
+                    d3.max(boxplotData, d => d.whiskers[1]) * 1.05
+                ])
+                .range([height, 0]);
+            
+            // Axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+            
+            svg.append('g')
+                .call(d3.axisLeft(y));
+            
+            // Grid lines
+            svg.append('g')
+                .attr('class', 'grid')
+                .call(d3.axisLeft(y)
+                    .tickSize(-width)
+                    .tickFormat(''))
+                .selectAll('.tick line')
+                .style('stroke', '#e2e8f0')
+                .style('stroke-width', 1);
+            
+            // Labels
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + margin.bottom - 10)
+                .style('text-anchor', 'middle')
+                .text('Group');
+            
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -margin.left + 15)
+                .attr('x', -height / 2)
+                .style('text-anchor', 'middle')
+                .text('Value');
+            
+            // Title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -5)
+                .style('text-anchor', 'middle')
+                .style('font-size', '14px')
+                .text('Distribution Across Groups');
+            
+            // Color scale
+            const color = d3.scaleOrdinal()
+                .domain(boxplotData.map(d => d.group))
+                .range(['#4C78A8', '#E45756', '#54A24B']);
+            
+            // Draw box plots
+            boxplotData.forEach((d, i) => {
+                const g = svg.append('g')
+                    .attr('transform', `translate(${x(d.group) + x.bandwidth() / 2}, 0)`);
+                
+                // Main box
+                g.append('rect')
+                    .attr('y', y(d.quartiles[2]))
+                    .attr('height', y(d.quartiles[0]) - y(d.quartiles[2]))
+                    .attr('width', x.bandwidth() * 0.7)
+                    .attr('fill', color(d.group))
+                    .attr('stroke', '#333')
+                    .attr('rx', 2)
+                    .attr('ry', 2);
+                
+                // Median line
+                g.append('line')
+                    .attr('y1', y(d.quartiles[1]))
+                    .attr('y2', y(d.quartiles[1]))
+                    .attr('x1', -x.bandwidth() * 0.35)
+                    .attr('x2', x.bandwidth() * 0.35)
+                    .attr('stroke', '#333')
+                    .attr('stroke-width', 2);
+                
+                // Whiskers
+                g.append('line')
+                    .attr('y1', y(d.whiskers[0]))
+                    .attr('y2', y(d.whiskers[1]))
+                    .attr('x1', 0)
+                    .attr('x2', 0)
+                    .attr('stroke', '#333')
+                    .attr('stroke-width', 1);
+                
+                // Top whisker cap
+                g.append('line')
+                    .attr('y1', y(d.whiskers[1]))
+                    .attr('y2', y(d.whiskers[1]))
+                    .attr('x1', -x.bandwidth() * 0.2)
+                    .attr('x2', x.bandwidth() * 0.2)
+                    .attr('stroke', '#333')
+                    .attr('stroke-width', 1);
+                
+                // Bottom whisker cap
+                g.append('line')
+                    .attr('y1', y(d.whiskers[0]))
+                    .attr('y2', y(d.whiskers[0]))
+                    .attr('x1', -x.bandwidth() * 0.2)
+                    .attr('x2', x.bandwidth() * 0.2)
+                    .attr('stroke', '#333')
+                    .attr('stroke-width', 1);
+                
+                // Outliers
+                g.selectAll('.outlier')
+                    .data(d.outliers)
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'outlier')
+                    .attr('cx', 0)
+                    .attr('cy', d => y(d))
+                    .attr('r', 3)
+                    .attr('fill', '#333')
+                    .attr('opacity', 0.5);
+                
+                // Add summary statistics tooltip
+                g.append('rect')
+                    .attr('y', y(d.quartiles[2]))
+                    .attr('height', y(d.quartiles[0]) - y(d.quartiles[2]))
+                    .attr('width', x.bandwidth() * 0.7)
+                    .attr('fill', 'transparent')
+                    .on('mouseover', function(event) {
+                        tooltip.transition()
+                            .duration(200)
+                            .style('opacity', .9);
+                        tooltip.html(`${d.group}<br/>
+                                     Min: ${d.whiskers[0].toFixed(1)}<br/>
+                                     Q1: ${d.quartiles[0].toFixed(1)}<br/>
+                                     Median: ${d.quartiles[1].toFixed(1)}<br/>
+                                     Q3: ${d.quartiles[2].toFixed(1)}<br/>
+                                     Max: ${d.whiskers[1].toFixed(1)}<br/>
+                                     Outliers: ${d.outliers.length}`)
+                            .style('left', (event.pageX + 10) + 'px')
+                            .style('top', (event.pageY - 28) + 'px');
+                    })
+                    .on('mouseout', function() {
+                        tooltip.transition()
+                            .duration(500)
+                            .style('opacity', 0);
+                    });
+            });
+            
+            // Add individual points (like a swarm plot)
+            if (group === 'all') {
+                const jitterWidth = x.bandwidth() * 0.3;
+                
+                boxplotData.forEach(d => {
+                    const jittered = d.values.map(v => ({
+                        value: v,
+                        x: x(d.group) + x.bandwidth() / 2 + (Math.random() - 0.5) * jitterWidth
+                    }));
+                    
+                    svg.selectAll('.point')
+                        .data(jittered)
+                        .enter()
+                        .append('circle')
+                        .attr('class', 'point')
+                        .attr('cx', d => d.x)
+                        .attr('cy', d => y(d.value))
+                        .attr('r', 2)
+                        .attr('fill', color(d.group))
+                        .attr('opacity', 0.5)
+                        .on('mouseover', function(event, d) {
+                            tooltip.transition()
+                                .duration(200)
+                                .style('opacity', .9);
+                            tooltip.html(`${d.group}<br/>Value: ${d.value.toFixed(1)}`)
+                                .style('left', (event.pageX + 10) + 'px')
+                                .style('top', (event.pageY - 28) + 'px');
+                        })
+                        .on('mouseout', function() {
+                            tooltip.transition()
+                                .duration(500)
+                                .style('opacity', 0);
+                        });
+                });
+            }
+        }
+        
+        function renderHeatmap(data) {
+            const cmap = document.getElementById('heatmap-cmap').value;
+            const margin = {top: 50, right: 50, bottom: 80, left: 80};
+            const width = document.getElementById('heatmap').clientWidth - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+            
+            d3.select('#heatmap').selectAll('*').remove();
+            
+            const svg = d3.select('#heatmap')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Color scale
+            let colorScale;
+            if (cmap === 'viridis') {
+                colorScale = d3.scaleSequential(d3.interpolateViridis)
+                    .domain([-1, 1]);
+            } else if (cmap === 'plasma') {
+                colorScale = d3.scaleSequential(d3.interpolatePlasma)
+                    .domain([-1, 1]);
+            } else if (cmap === 'coolwarm') {
+                colorScale = d3.scaleSequential(d3.interpolateCoolWarm)
+                    .domain([-1, 1]);
+            } else {
+                colorScale = d3.scaleSequential(d3.interpolateRdYlBu)
+                    .domain([1, -1]); // Reversed for RdYlBu
+            }
+            
+            // Scales
+            const x = d3.scaleBand()
+                .domain(data.features)
+                .range([0, width])
+                .padding(0.05);
+            
+            const y = d3.scaleBand()
+                .domain(data.features)
+                .range([0, height])
+                .padding(0.05);
+            
+            // Axes
+            svg.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end');
+            
+            svg.append('g')
+                .call(d3.axisLeft(y));
+            
+            // Labels
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', height + margin.bottom - 30)
+                .style('text-anchor', 'middle')
+                .text('Features');
+            
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', -margin.left + 20)
+                .attr('x', -height / 2)
+                .style('text-anchor', 'middle')
+                .text('Features');
+            
+            // Title
+            svg.append('text')
+                .attr('x', width / 2)
+                .attr('y', -20)
+                .style('text-anchor', 'middle')
+                .style('font-size', '14px')
+                .text('Feature Correlation Matrix');
+            
+            // Heatmap rectangles
+            data.features.forEach(f1 => {
+                data.features.forEach(f2 => {
+                    svg.append('rect')
+                        .attr('x', x(f1))
+                        .attr('y', y(f2))
+                        .attr('width', x.bandwidth())
+                        .attr('height', y.bandwidth())
+                        .attr('fill', colorScale(data.correlation[f1][f2]))
+                        .attr('stroke', 'white')
+                        .attr('stroke-width', 0.5)
+                        .on('mouseover', function(event) {
+                            tooltip.transition()
+                                .duration(200)
+                                .style('opacity', .9);
+                            tooltip.html(`${f1} vs ${f2}<br/>
+                                         Correlation: ${data.correlation[f1][f2].toFixed(2)}`)
+                                .style('left', (event.pageX + 10) + 'px')
+                                .style('top', (event.pageY - 28) + 'px');
+                            
+                            d3.select(this)
+                                .attr('stroke', '#333')
+                                .attr('stroke-width', 2);
+                        })
+                        .on('mouseout', function() {
+                            tooltip.transition()
+                                .duration(500)
+                                .style('opacity', 0);
+                            
+                            d3.select(this)
+                                .attr('stroke', 'white')
+                                .attr('stroke-width', 0.5);
+                        });
+                });
+            });
+            
+            // Add correlation values
+            data.features.forEach(f1 => {
+                data.features.forEach(f2 => {
+                    svg.append('text')
+                        .attr('x', x(f1) + x.bandwidth() / 2)
+                        .attr('y', y(f2) + y.bandwidth() / 2)
+                        .attr('text-anchor', 'middle')
+                        .attr('dy', '.35em')
+                        .style('font-size', '10px')
+                        .style('fill', d => Math.abs(data.correlation[f1][f2]) > 0.5 ? 'white' : '#333')
+                        .text(data.correlation[f1][f2].toFixed(2));
+                });
+            });
+            
+            // Add color legend
+            const legendWidth = 200;
+            const legendHeight = 20;
+            const legendMargin = {top: 0, right: 50, bottom: 30, left: 0};
+            
+            const legendSvg = svg.append('g')
+                .attr('transform', `translate(${width / 2 - legendWidth / 2}, ${height + 40})`);
+            
+            const defs = legendSvg.append('defs');
+            const gradient = defs.append('linearGradient')
+                .attr('id', 'gradient')
+                .attr('x1', '0%')
+                .attr('y1', '0%')
+                .attr('x2', '100%')
+                .attr('y2', '0%');
+            
+            if (cmap === 'viridis') {
+                gradient.append('stop')
+                    .attr('offset', '0%')
+                    .attr('stop-color', d3.interpolateViridis(0));
+                gradient.append('stop')
+                    .attr('offset', '100%')
+                    .attr('stop-color', d3.interpolateViridis(1));
+            } else if (cmap === 'plasma') {
+                gradient.append('stop')
+                    .attr('offset', '0%')
+                    .attr('stop-color', d3.interpolatePlasma(0));
+                gradient.append('stop')
+                    .attr('offset', '100%')
+                    .attr('stop-color', d3.interpolatePlasma(1));
+            } else if (cmap === 'coolwarm') {
+                gradient.append('stop')
+                    .attr('offset', '0%')
+                    .attr('stop-color', d3.interpolateCoolWarm(0));
+                gradient.append('stop')
+                    .attr('offset', '100%')
+                    .attr('stop-color', d3.interpolateCoolWarm(1));
+            } else {
+                gradient.append('stop')
+                    .attr('offset', '0%')
+                    .attr('stop-color', d3.interpolateRdYlBu(0));
+                gradient.append('stop')
+                    .attr('offset', '100%')
+                    .attr('stop-color', d3.interpolateRdYlBu(1));
+            }
+            
+            legendSvg.append('rect')
+                .attr('width', legendWidth)
+                .attr('height', legendHeight)
+                .style('fill', 'url(#gradient)');
+            
+            const legendScale = d3.scaleLinear()
+                .domain([-1, 1])
+                .range([0, legendWidth]);
+            
+            const legendAxis = d3.axisBottom(legendScale)
+                .ticks(5);
+            
+            legendSvg.append('g')
+                .attr('transform', `translate(0, ${legendHeight})`)
+                .call(legendAxis);
+            
+            legendSvg.append('text')
+                .attr('x', legendWidth / 2)
+                .attr('y', legendHeight + 25)
+                .style('text-anchor', 'middle')
+                .style('font-size', '10px')
+                .text('Correlation');
+        }
+        
+        function renderPieChart(data) {
+            const explode = document.getElementById('pie-explode').value;
+            const margin = {top: 20, right: 20, bottom: 20, left: 20};
+            const width = Math.min(document.getElementById('pie-chart').clientWidth, 500) - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+            const radius = Math.min(width, height) / 2;
+            
+            d3.select('#pie-chart').selectAll('*').remove();
+            
+            const svg = d3.select('#pie-chart')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${width / 2 + margin.left},${height / 2 + margin.top})`);
+            
+            // Color scale
+            const color = d3.scaleOrdinal()
+                .domain(data.categories)
+                .range(['#4C78A8', '#E45756', '#54A24B', '#EECA3B', '#B279A2']);
+            
+            // Pie generator
+            const pie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
+            
+            const data_ready = pie(data.categories.map((cat, i) => ({
+                category: cat,
+                value: data.values[i],
+                percentage: data.percentages[i]
+            })));
+            
+            // Arc generator
+            const arc = d3.arc()
+                .innerRadius(0)
+                .outerRadius(radius);
+            
+            // Explode effect
+            const arcExplode = d3.arc()
+                .innerRadius(0)
+                .outerRadius(radius * 1.05);
+            
+            // Draw pie slices
+            svg.selectAll('slices')
+                .data(data_ready)
+                .enter()
+                .append('path')
+                .attr('d', (d, i) => {
+                    if (explode === 'all') {
+                        return arcExplode(d);
+                    } else if (explode === 'some' && i === 0) {
+                        return arcExplode(d);
+                    } else {
+                        return arc(d);
+                    }
+                })
+                .attr('fill', d => color(d.data.category))
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .on('mouseover', function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+                    tooltip.html(`${d.data.category}<br/>
+                                 Value: ${d.data.value.toFixed(1)}<br/>
+                                 Percentage: ${d.data.percentage}%`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                    
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('d', arcExplode);
+                })
+                .on('mouseout', function(event, d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                    
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr('d', d => {
+                            if (explode === 'all') {
+                                return arcExplode(d);
+                            } else if (explode === 'some' && d.data.category === data.categories[0]) {
+                                return arcExplode(d);
+                            } else {
+                                return arc(d);
+                            }
+                        });
+                });
+            
+            // Add labels
+            svg.selectAll('text')
+                .data(data_ready)
+                .enter()
+                .append('text')
+                .attr('transform', d => `translate(${arc.centroid(d)})`)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('fill', 'white')
+                .text(d => `${d.data.percentage}%`);
+            
+            // Add title
+            svg.append('text')
+                .attr('y', -height / 2 + 20)
+                .style('text-anchor', 'middle')
+                .style('font-size', '14px')
+                .text('Sales Distribution by Category');
+            
+            // Add legend
+            const legend = svg.selectAll('.legend')
+                .data(data.categories)
+                .enter()
+                .append('g')
+                .attr('class', 'legend')
+                .attr('transform', (d, i) => `translate(${width / 2 - 100}, ${-height / 2 + 50 + i * 20})`);
+            
+            legend.append('rect')
+                .attr('width', 15)
+                .attr('height', 15)
+                .attr('fill', d => color(d));
+            
+            legend.append('text')
+                .attr('x', 20)
+                .attr('y', 12)
+                .style('font-size', '12px')
+                .text(d => d);
+        }
+        
+        function renderScatterMatrix(data) {
+            const variables = parseInt(document.getElementById('splom-variables').value);
+            const margin = {top: 30, right: 30, bottom: 50, left: 50};
+            const size = Math.min(document.getElementById('scatter-matrix').clientWidth, 600) - margin.left - margin.right;
+            const cellSize = size / variables;
+            
+            d3.select('#scatter-matrix').selectAll('*').remove();
+            
+            const svg = d3.select('#scatter-matrix')
+                .append('svg')
+                .attr('width', size + margin.left + margin.right)
+                .attr('height', size + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            // Extract variable names
+            const vars = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width'];
+            if (variables >= 5) vars.push('species');
+            
+            // Color scale
+            const color = d3.scaleOrdinal()
+                .domain(['setosa', 'versicolor', 'virginica'])
+                .range(['#4C78A8', '#E45756', '#54A24B']);
+            
+            // Create scales for each variable
+            const scales = {};
+            vars.forEach(v => {
+                if (v === 'species') return;
+                
+                const values = data.map(d => d[v]);
+                scales[v] = d3.scaleLinear()
+                    .domain(d3.extent(values))
+                    .range([10, cellSize - 10]);
+            });
+            
+            // Create a grid of scatter plots
+            for (let i = 0; i < variables; i++) {
+                for (let j = 0; j < variables; j++) {
+                    const cell = svg.append('g')
+                        .attr('transform', `translate(${i * cellSize},${j * cellSize})`);
+                    
+                    // Add border
+                    cell.append('rect')
+                        .attr('width', cellSize)
+                        .attr('height', cellSize)
+                        .attr('fill', 'none')
+                        .attr('stroke', '#e2e8f0');
+                    
+                    if (i === j) {
+                        // Diagonal - show density plot or variable name
+                        cell.append('text')
+                            .attr('x', cellSize / 2)
+                            .attr('y', cellSize / 2)
+                            .attr('text-anchor', 'middle')
+                            .attr('dy', '.35em')
+                            .text(vars[i].replace('_', ' '));
+                    } else {
+                        // Off-diagonal - scatter plot
+                        const xVar = vars[i];
+                        const yVar = vars[j];
+                        
+                        // Add points
+                        cell.selectAll('.point')
+                            .data(data)
+                            .enter()
+                            .append('circle')
+                            .attr('class', 'point')
+                            .attr('cx', d => scales[xVar](d[xVar]))
+                            .attr('cy', d => scales[yVar](d[yVar]))
+                            .attr('r', 3)
+                            .attr('fill', d => color(d.species))
+                            .attr('opacity', 0.7)
+                            .on('mouseover', function(event, d) {
+                                tooltip.transition()
+                                    .duration(200)
+                                    .style('opacity', .9);
+                                tooltip.html(`Species: ${d.species}<br/>
+                                             ${xVar}: ${d[xVar].toFixed(1)}<br/>
+                                             ${yVar}: ${d[yVar].toFixed(1)}`)
+                                    .style('left', (event.pageX + 10) + 'px')
+                                    .style('top', (event.pageY - 28) + 'px');
+                            })
+                            .on('mouseout', function() {
+                                tooltip.transition()
+                                    .duration(500)
+                                    .style('opacity', 0);
+                            });
+                        
+                        // Add axes
+                        if (i === 0) {
+                            // Leftmost column - add y-axis
+                            cell.append('g')
+                                .call(d3.axisLeft(scales[yVar]).ticks(3))
+                                .attr('transform', `translate(10, 0)`);
+                        }
+                        
+                        if (j === variables - 1) {
+                            // Bottom row - add x-axis
+                            cell.append('g')
+                                .call(d3.axisBottom(scales[xVar]).ticks(3))
+                                .attr('transform', `translate(0, ${cellSize - 10})`);
+                        }
+                    }
+                }
+            }
+            
+            // Add title
+            svg.append('text')
+                .attr('x', size / 2)
+                .attr('y', -10)
+                .style('text-anchor', 'middle')
+                .style('font-size', '14px')
+                .text('Scatter Plot Matrix');
+            
+            // Add legend
+            const legend = svg.append('g')
+                .attr('transform', `translate(${size - 100}, 20)`);
+            
+            const species = ['setosa', 'versicolor', 'virginica'];
+            
+            legend.selectAll('.legend-item')
+                .data(species)
+                .enter()
+                .append('g')
+                .attr('class', 'legend-item')
+                .attr('transform', (d, i) => `translate(0, ${i * 20})`)
+                .each(function(d) {
+                    const g = d3.select(this);
+                    g.append('circle')
+                        .attr('r', 6)
+                        .attr('cx', 0)
+                        .attr('cy', 0)
+                        .style('fill', color(d));
+                    
+                    g.append('text')
+                        .attr('x', 15)
+                        .attr('y', 5)
+                        .style('font-size', '12px')
+                        .text(d);
+                });
+        }
+        
+        function renderRadarChart(data) {
+            const metric = document.getElementById('radar-metric').value;
+            const margin = {top: 50, right: 50, bottom: 50, left: 50};
+            const width = Math.min(document.getElementById('radar-chart').clientWidth, 500) - margin.left - margin.right;
+            const height = 400 - margin.top - margin.bottom;
+            const radius = Math.min(width, height) / 2;
+            
+            d3.select('#radar-chart').selectAll('*').remove();
+            
+            const svg = d3.select('#radar-chart')
+                .append('svg')
+                .attr('width', width + margin.left + margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+                .attr('transform', `translate(${width / 2 + margin.left},${height / 2 + margin.top})`);
+            
+            // Prepare data
+            const categories = data.categories;
+            const numVars = categories.length;
+            
+            // Compute angles
+            const angleSlice = Math.PI * 2 / numVars;
+            
+            // Scales
+            const r = d3.scaleLinear()
+                .domain([0, 100])
+                .range([0, radius]);
+            
+            // Axes
+            const axisGrid = svg.append('g')
+                .attr('class', 'axisWrapper');
+            
+            // Draw circular grid
+            const levels = 5;
+            for (let i = 0; i < levels; i++) {
+                const levelFactor = radius * ((i + 1) / levels);
+                
+                axisGrid.append('circle')
+                    .attr('class', 'gridCircle')
+                    .attr('r', levelFactor)
+                    .style('fill', 'none')
+                    .style('stroke', '#e2e8f0')
+                    .style('stroke-width', 1);
+                
+                axisGrid.append('text')
+                    .attr('class', 'axisLabel')
+                    .attr('x', 5)
+                    .attr('y', -levelFactor + 5)
+                    .text((i + 1) * 20);
+            }
+            
+            // Draw axes
+            const axis = axisGrid.selectAll('.axis')
+                .data(categories)
+                .enter()
+                .append('g')
+                .attr('class', 'axis');
+            
+            axis.append('line')
+                .attr('x1', 0)
+                .attr('y1', 0)
+                .attr('x2', (d, i) => r(100) * Math.cos(angleSlice * i - Math.PI / 2))
+                .attr('y2', (d, i) => r(100) * Math.sin(angleSlice * i - Math.PI / 2))
+                .attr('class', 'line')
+                .style('stroke', '#e2e8f0')
+                .style('stroke-width', 1);
+            
+            axis.append('text')
+                .attr('class', 'legend')
+                .style('font-size', '11px')
+                .attr('text-anchor', 'middle')
+                .attr('dy', '0.35em')
+                .attr('x', (d, i) => r(110) * Math.cos(angleSlice * i - Math.PI / 2))
+                .attr('y', (d, i) => r(110) * Math.sin(angleSlice * i - Math.PI / 2))
+                .text(d => d);
+            
+            // Prepare player data
+            let playerValues;
+            if (metric === 'player1') {
+                playerValues = data.player1;
+            } else if (metric === 'player2') {
+                playerValues = data.player2;
+            } else {
+                playerValues = data.player3;
+            }
+            
+            // Radar line generator
+            const radarLine = d3.lineRadial()
+                .curve(d3.curveLinearClosed)
+                .radius(d => r(d.value))
+                .angle((d, i) => i * angleSlice);
+            
+            // Format data for radar
+            const radarData = categories.map((cat, i) => ({
+                axis: cat,
+                value: playerValues[i]
+            }));
+            
+            // Draw radar area
+            svg.append('path')
+                .datum(radarData)
+                .attr('class', 'radarArea')
+                .attr('d', radarLine)
+                .style('fill', '#4C78A8')
+                .style('fill-opacity', 0.3)
+                .style('stroke', '#4C78A8')
+                .style('stroke-width', 2);
+            
+            // Draw radar dots
+            svg.selectAll('.radarCircle')
+                .data(radarData)
+                .enter()
+                .append('circle')
+                .attr('class', 'radarCircle')
+                .attr('r', 4)
+                .attr('cx', (d, i) => r(d.value) * Math.cos(angleSlice * i - Math.PI / 2))
+                .attr('cy', (d, i) => r(d.value) * Math.sin(angleSlice * i - Math.PI / 2))
+                .style('fill', '#4C78A8')
+                .style('stroke', '#4C78A8')
+                .style('stroke-width', 2)
+                .on('mouseover', function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+                    tooltip.html(`${d.axis}<br/>Score: ${d.value.toFixed(1)}`)
+                        .style('left', (event.pageX + 10) + 'px')
+                        .style('top', (event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function() {
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                });
+            
+            // Add title
+            svg.append('text')
+                .attr('y', -height / 2 + 20)
+                .style('text-anchor', 'middle')
+                .style('font-size', '14px')
+                .text(`Player Comparison: ${metric.replace('player', 'Player ')}`);
+        }
+    </script>
+</body>
+</html>
